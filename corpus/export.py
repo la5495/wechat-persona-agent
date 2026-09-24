@@ -23,7 +23,28 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 import wxsnap  # noqa: E402
 
-SELF = "wxid_你的wxid"
+def detect_self_wxid() -> str:
+    """认出「我是谁」——换机器不用改代码。
+
+    顺序：config.json 的 self_wxid → 从微信库目录名里抠（…\\wxid_xxx_abcd\\db_storage）
+    """
+    try:
+        with open(os.path.join(ROOT, "config.json"), encoding="utf-8") as f:
+            w = (json.load(f).get("self_wxid") or "").strip()
+        if re.fullmatch(r"wxid_[A-Za-z0-9_-]+", w):
+            return w
+    except Exception:
+        pass
+    try:
+        m = re.search(r"(wxid_[A-Za-z0-9_-]+)", wxsnap.SRC or "")
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
+    return ""
+
+
+SELF = detect_self_wxid()
 OUT = os.path.join(HERE, "turns")
 
 TYPE_LABEL = {
@@ -45,8 +66,26 @@ def safe(name: str) -> str:
 
 
 def load_scope():
-    with open(os.path.join(HERE, "scope.json"), encoding="utf-8") as f:
-        return json.load(f)
+    """读抓取范围。缺文件 / 没填会话时给出**人话提示**，不是一堆 traceback。"""
+    p = os.path.join(HERE, "scope.json")
+    if not os.path.exists(p):
+        ex = os.path.join(HERE, "scope.example.json")
+        print("❌ 还没有 corpus/scope.json —— 先建一个：")
+        print("     copy corpus\\scope.example.json corpus\\scope.json")
+        print("   然后打开它，把 since 和 chats 改成你要抓的（会话名要和微信里显示的一致）")
+        print("   想先看看有哪些会话名 → python wxsnap.py sessions")
+        if os.path.exists(ex):
+            print("   （示例文件在：%s）" % ex)
+        sys.exit(2)
+    with open(p, encoding="utf-8") as f:
+        scope = json.load(f)
+    chats = [c for c in (scope.get("chats") or []) if c]
+    if not chats:
+        print("❌ corpus/scope.json 里的 chats 是空的 —— 至少填一个会话名")
+        print("   会话名去哪找：python wxsnap.py sessions")
+        sys.exit(2)
+    scope["chats"] = chats
+    return scope
 
 
 def main():

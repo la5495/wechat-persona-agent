@@ -59,10 +59,56 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SNAPSHOT = os.path.join(HERE, "snapshot", "db_storage")
 PLAIN = os.path.join(HERE, "plain", "db_storage")
 
-# 原库位置 —— 本机实测；换机器只改这里（或 set WXSNAP_SRC）
-DEFAULT_SRC = (r"<微信数据目录>"
-               r"\wxid_你的wxid_b422\db_storage")
-SRC = os.environ.get("WXSNAP_SRC", DEFAULT_SRC)
+
+def find_db_root() -> str:
+    """自动找微信的 db_storage 目录（换机器不用改代码）。
+
+    查找顺序：
+      1. 环境变量 WXSNAP_SRC
+      2. config.json 的 paths.db_root
+      3. 常见位置自动扫描（各盘符下的 xwechat_files/*/db_storage）
+    返回找到的路径；找不到返回 ""（调用方给出友好提示）。
+    """
+    env = os.environ.get("WXSNAP_SRC")
+    if env and os.path.isdir(env):
+        return env
+    # 2) config.json
+    try:
+        with open(os.path.join(HERE, "config.json"), encoding="utf-8") as f:
+            p = (json.load(f).get("paths") or {}).get("db_root")
+        if p and os.path.isdir(p):
+            return p
+    except Exception:
+        pass
+    # 3) 常见位置扫描
+    import glob
+    cands = []
+    home = os.path.expanduser("~")
+    bases = [
+        os.path.join(home, "Documents", "xwechat_files"),
+        os.path.join(home, "Documents", "WeChat Files"),
+        os.path.expandvars(r"%APPDATA%\Tencent\xwechat_files"),
+        os.path.expandvars(r"%LOCALAPPDATA%\Tencent\xwechat_files"),
+    ]
+    for drive in ("C:", "D:", "E:", "F:"):
+        bases.append(drive + r"\xwechat_files")
+        bases.append(drive + r"\微信聊天记录\xwechat_files")
+        bases.append(drive + r"\WeChat Files")
+    for b in bases:
+        if not b or not os.path.isdir(b):
+            continue
+        for pat in ("*/db_storage", "db_storage"):
+            hit = glob.glob(os.path.join(b, pat))
+            cands.extend([h for h in hit if os.path.isdir(h)])
+    # 优先带 message 子库的那个
+    for c in cands:
+        if os.path.isdir(os.path.join(c, "message")):
+            return c
+    return cands[0] if cands else ""
+
+
+DEFAULT_SRC = find_db_root() or r"<未找到，请设置环境变量 WXSNAP_SRC 或 config.json 的 paths.db_root>"
+SRC = os.environ.get("WXSNAP_SRC") or DEFAULT_SRC
 
 PROC_NAME = "Weixin.exe"
 

@@ -83,34 +83,60 @@ UI 自动化会**报成功但其实没发出去**。发完刷新副本、查库�
 
 ## 快速开始
 
-**环境**：Windows + 微信 4.x + Python 3.12 + 本地 Ollama（做记忆抽取，可选）
+**环境要求**
+
+| 需要 | 说明 |
+|---|---|
+| **Windows** | 项目依赖 Windows UI 自动化 + 微信客户端，macOS/Linux 跑不了 |
+| **微信 4.x**（PC 版） | 已验证 **4.1.15.9**；其他版本库结构可能不同，先跑体检确认 |
+| **Python 3.12** | 3.10+ 均可 |
+| **Ollama**（可选） | 做记忆抽取与人设蒸馏；不装也能跑，只是这两步跳过 |
+| **DeepSeek API key** | 回话用（也可改配置换别的兼容 OpenAI 协议的模型） |
+
+**安装（5 步）**
 
 ```powershell
-# 1. 依赖
+git clone https://github.com/<你的用户名>/wechat-persona-agent.git
+cd wechat-persona-agent
+
+# 1. 建虚拟环境 + 装依赖
 uv venv .venv
-uv pip install --python .venv\Scripts\python.exe cryptography zstandard pywin32 `
-    uiautomation pyperclip Pillow numpy psutil
+uv pip install --python .venv\Scripts\python.exe -r requirements.txt
 
-# 2. 配置（从示例抄）
-copy config.example.json config.json
-copy secrets.example.json secrets.json     # 填你自己的 DEEPSEEK_API_KEY
+# 2. 体检（会告诉你还缺什么、下一步做什么）
+.venv\Scripts\python.exe doctor.py --fix
 
-# 3. 验证读腿（会打印密钥指纹，不打印密钥）
-python wxsnap.py keys
-python wxsnap.py refresh
-python wxsnap.py sessions --unread
+# 3. 按体检提示，把这几处填成你自己的：
+#    config.json          → self_wxid（在 …\xwechat_files\<wxid>_xxxx\ 目录名里）
+#    secrets.json         → DEEPSEEK_API_KEY
+#    corpus/scope.json    → 要抓哪些会话（.venv\Scripts\python.exe wxsnap.py sessions 可查）
+#    sender/config.json   → 发送腿白名单（默认只允许发「文件传输助手」，先拿它练手）
 
-# 4. 蒸馏人设与记忆（本地模型，零 API 费）
-python corpus/export.py && python corpus/pairs.py && python corpus/style_stats.py
-python corpus/build_persona.py
-python corpus/memory_build.py
+# 4. 解密微信库（**微信要开着**，密钥从它进程内存里读）
+.venv\Scripts\python.exe wxsnap.py keys       # 只打印密钥指纹，不打印密钥
+.venv\Scripts\python.exe wxsnap.py refresh
 
-# 5. 先看它想说什么（只写草稿，不发）
-python run.py --once
-type logs\drafts.jsonl
+# 5. 蒸馏人设 + 建记忆（本地模型，零 API 费）
+.venv\Scripts\python.exe corpus\export.py
+.venv\Scripts\python.exe corpus\pairs.py
+.venv\Scripts\python.exe corpus\style_stats.py
+.venv\Scripts\python.exe corpus\build_persona.py
+.venv\Scripts\python.exe corpus\memory_build.py
+```
 
-# 6. 满意了再启动常驻
-python service.py start
+**先看它想说什么（不会发出去）**
+
+```powershell
+.venv\Scripts\python.exe run.py --once      # 只写草稿
+type logs\drafts.jsonl                      # 看草稿
+```
+
+**满意了再启动常驻**
+
+```powershell
+.venv\Scripts\python.exe service.py start   # 启动（默认仍只写草稿）
+# 然后在微信里给「文件传输助手」发「开始」→ 才真的会替你回话
+# 想停：发「停止」；想彻底关：service.py stop（或双击 .cmd 按钮）
 ```
 
 ---
@@ -134,6 +160,7 @@ python service.py start
 ## 目录结构
 
 ```
+├── doctor.py           🩺 环境体检：拿到项目先跑这个
 ├── wxsnap.py           读腿：密钥提取 / 解密 / 会话消息 / 版本兼容检查
 ├── run.py              编排：判定该回谁 → 生成 → 连发 → 查库校验
 ├── reply.py            回复引擎：人设提示词 + 四道红线过滤
