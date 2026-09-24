@@ -1,0 +1,18 @@
+# 微信 AI 分身 —— 依赖（Python 3.12 / Windows）
+# 装法：uv pip install --python .venv\Scripts\python.exe -r requirements.txt
+
+# ---- 读腿：解密微信本地库 ----
+cryptography>=42.0
+zstandard>=0.22
+
+# ---- 发送腿：Windows UI 自动化 ----
+pywin32>=306
+uiautomation>=2.0
+pyperclip>=1.8
+Pillow>=10.0
+numpy>=1.26
+psutil>=5.9
+wechatauto-replica>=1.2.3
+
+# ---- 可选：hook 实验（读内存找密钥/观察发送路径）----
+# frida>=17.0

@@ -1,0 +1,32 @@
+MIT License
+
+Copyright (c) 2026 <在这里填你的名字>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==========================================================================
+附加声明（使用前必读）
+
+1. 本项目仅供个人学习研究。客户端自动化与数据库读取可能违反微信（腾讯）
+   的服务条款，账号存在被封禁的风险，请自行评估并承担后果。
+2. 本项目会以操作者本人的身份对外发送消息。由此产生的社交后果（朋友误认为
+   是本人真实意思等），由操作者自行承担。
+3. 严禁用于：冒充他人、读取他人聊天记录、诈骗、骚扰等任何违法或侵权用途。
+4. 项目不附带任何担保，作者不对使用造成的任何损失负责。
+==========================================================================

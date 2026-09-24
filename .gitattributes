@@ -1,0 +1,7 @@
+# 统一换行符：代码走 LF（跨平台友好），Windows 专用脚本保留 CRLF
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary

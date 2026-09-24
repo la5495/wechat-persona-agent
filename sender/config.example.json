@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "mode": "draft",
+  "auto": {
+    "enabled": false
+  },
+  "persona": {
+    "file": "persona.md",
+    "enabled": true
+  },
+  "whitelist": [],
+  "blacklist": [],
+  "skip_sessions": [
+    "服务号",
+    "公众号",
+    "订阅号",
+    "折叠的聊天",
+    "折叠群聊",
+    "微信团队",
+    "微信支付",
+    "腾讯新闻"
+  ],
+  "rate": {
+    "min_gap_sec": 2.5,
+    "max_gap_sec": 6.0,
+    "window_sec": 120,
+    "window_max_writes": 6,
+    "cooldown_min_sec": 30,
+    "cooldown_max_sec": 75
+  },
+  "redaction": {
+    "enabled": true,
+    "block_on_hit": true,
+    "patterns": [
+      "sk-[A-Za-z0-9_-]{16,}",
+      "api[_-]?key",
+      "Bearer\\s+[A-Za-z0-9._-]{16,}",
+      "密码",
+      "验证码",
+      "身份证",
+      "银行卡"
+    ]
+  },
+  "paths": {
+    "audit": "audit.jsonl",
+    "stop": "STOP",
+    "_state_dir": "指向主项目的 state（共用同一份白名单/开关/速率），避免两份名单漂移",
+    "state_dir": "state"
+  },
+  "read": {
+    "activate_on_start": true,
+    "set_screen_reader": true,
+    "max_sessions": 80,
+    "max_messages": 60
+  },
+  "watch": {
+    "targets": [],
+    "max_sessions_per_round": 8,
+    "min_unread": 1,
+    "interval_sec": 30,
+    "draft_when_off": false
+  },
+  "esc_watch": {
+    "enabled": true,
+    "vk": 27,
+    "name": "ESC",
+    "poll_sec": 0.08
+  },
+  "harvest": {
+    "targets": [],
+    "max_sessions_per_round": 6,
+    "max_messages": 25,
+    "include_muted": true,
+    "interval_sec": 120,
+    "idle_sec": 8,
+    "restore_cursor": true,
+    "skip_when_auto": false
+  },
+  "reply": {
+    "engine": "cloud",
+    "temperature": 0.7,
+    "max_chars": 120,
+    "context_messages": 8,
+    "echo_sessions": [
+      "文件传输助手"
+    ],
+    "idle_sec": 3,
+    "restore_cursor": true,
+    "yield_to_master_sec": 600,
+    "max_message_age_sec": 300,
+    "memory": {
+      "enabled": true,
+      "recent_turns": 6,
+      "retrieve_k": 4,
+      "max_chars": 1200
+    },
+    "system_prompt": "",
+    "ollama": {
+      "endpoint": "http://127.0.0.1:11434/api/generate",
+      "model": "qwen2.5:7b",
+      "timeout_sec": 90,
+      "think": false,
+      "num_predict": 300,
+      "context_messages": 8,
+      "fewshot": 3
+    },
+    "cloud": {
+      "preset": "deepseek",
+      "secrets_file": "secrets.json",
+      "max_tokens": 1500,
+      "timeout_sec": 60,
+      "context_messages": 8,
+      "fewshot": 0,
+      "presets": {
+        "deepseek": {
+          "endpoint": "https://api.deepseek.com/v1/chat/completions",
+          "model": "deepseek-flash",
+          "api_key_env": "DEEPSEEK_API_KEY"
+        },
+        "moonshot": {
+          "endpoint": "https://api.moonshot.cn/v1/chat/completions",
+          "model": "moonshot-v1-8k",
+          "api_key_env": "MOONSHOT_API_KEY"
+        },
+        "dashscope": {
+          "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+          "model": "qwen-plus",
+          "api_key_env": "DASHSCOPE_API_KEY"
+        },
+        "siliconflow": {
+          "endpoint": "https://api.siliconflow.cn/v1/chat/completions",
+          "model": "Qwen/Qwen2.5-7B-Instruct",
+          "api_key_env": "SILICONFLOW_API_KEY"
+        },
+        "openai": {
+          "endpoint": "https://api.openai.com/v1/chat/completions",
+          "model": "gpt-4o-mini",
+          "api_key_env": "OPENAI_API_KEY"
+        }
+      }
+    }
+  },
+  "send": {
+    "verify": false,
+    "restore_clipboard": true,
+    "allowed_targets": [
+      "文件传输助手"
+    ],
+    "readback_verify": true
+  },
+  "_notes": {
+    "auto.enabled": "出厂默认值。真正的开关是 state/auto.json —— 用 python switch.py on/off 控制",
+    "persona.file": "自动回复的人设(system prompt)，直接改那个 md 文件即可",
+    "whitelist": "只对这些会话名自动回复；真正的名单在 state/whitelist.json，用 python whitelist.py 增删",
+    "mode": "仅供参考；实际是否自动发送由 switch.py 的开关决定",
+    "set_screen_reader": "热激活需要置位系统读屏标志；退出时自动还原",
+    "send.verify": "必须保持 false —— true 会去读微信数据库，属高压线",
+    "reply.think": "本地 qwen3.5 是思考型模型，必须 think=false，否则 response 恒为空"
+  }
+}

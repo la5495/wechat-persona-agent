@@ -1,0 +1,79 @@
+# ============================================================================
+#  ⚠️ 这个项目里全是隐私数据 —— 下面这些**绝对不能上传**
+#  如果你在别处复用这份 .gitignore，请保持这些条目
+# ============================================================================
+
+# ---- 1. 密钥、凭证 ----
+secrets.json
+*.key
+*.pem
+keys/
+.env
+.env.*
+
+# ---- 2. 微信数据库副本 / 解密密钥（最敏感）----
+plain/
+snapshot/
+*.db
+*.db-wal
+*.db-shm
+
+# ---- 3. 主人的聊天语料（真实对话，含好友姓名/手机号）----
+corpus/turns/
+corpus/pairs.jsonl
+corpus/pairs_stats.json
+corpus/style_stats.json
+corpus/style_report.md
+corpus/profiles/
+corpus/memory.db
+corpus/memory.db-*
+corpus/memory_build.log
+corpus/blindtest/
+corpus/persona/examples.jsonl
+corpus/persona/contacts/
+corpus/persona/identity.md
+corpus/persona/style_rules.md
+corpus/scope.json
+corpus/persona/PROMPT.md
+
+# ---- 4. 运行状态与日志（含好友名单、发出去的原话）----
+state/
+logs/
+audit.jsonl
+drafts.jsonl
+STOP
+*.log
+
+# ---- 5. 本机配置（含 self_wxid）----
+config.json
+sender/config.json
+sender/secrets.json
+sender/state/
+sender/audit.jsonl
+sender/persona.md
+
+# ---- 6. 归档（旧项目备份里有 secrets.json）----
+_archive/
+tools/_archive/
+
+# ---- 7. 运行环境 / 缓存（几百 MB，别传）----
+.venv/
+.uv-cache/
+.uv-python/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+
+# ---- 8. 编辑器 / 系统 ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+#  能安全上传的（供参考，不用写进 .gitignore）：
+#    *.py（代码）、README.md、使用说明.md、docs/、corpus/README.md、
+#    corpus/*.py（管线脚本）、*.cmd、config.example.json、LICENSE
+# ============================================================================

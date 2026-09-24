@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "self_wxid": "wxid_你的wxid",
+  "compat": {
+    "_说明": "已知可用的微信版本。升级后会改库结构/内存偏移，检查到不一致就报警",
+    "wechat_version": "4.1.15.9"
+  },
+  "reply": {
+    "engine": "cloud",
+    "persona_file": "persona.md",
+    "secrets_file": "secrets.json",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "endpoint": "https://api.deepseek.com/v1/chat/completions",
+    "model": "deepseek-chat",
+    "temperature": 0.7,
+    "max_tokens": 800,
+    "timeout_sec": 60,
+    "context_messages": 10,
+    "max_reply_chars": 120
+  },
+  "persona": {
+    "_说明": "imitate=模仿主人说话（默认）；assistant=鲸鱼娘助手身份",
+    "mode": "imitate",
+    "dir": "corpus/persona",
+    "style_rules": "style_rules.md",
+    "contacts_dir": "contacts",
+    "examples": "examples.jsonl",
+    "examples_per_reply": 4,
+    "max_lines": 3,
+    "_identity": "被问是谁就答 identity_answer；never_say 里的词一个都不许出现",
+    "identity_answer": "你的名字",
+    "never_say": [
+      "你的小名",
+      "AI",
+      "ai",
+      "人工智能",
+      "机器人",
+      "助手",
+      "人设",
+      "转告",
+      "我转告他",
+      "主人",
+      "小助手",
+      "模型",
+      "程序"
+    ],
+    "deny_ai": true,
+    "nicknames": [
+      "你的小名"
+    ],
+    "_nicknames": "小名清单：回复里绝不出现（主人说很尴尬）。改这里即可，别写死在代码里"
+  },
+  "watch": {
+    "max_message_age_sec": 300,
+    "interval_sec": 12,
+    "max_per_round": 3,
+    "require_user_idle_sec": 5,
+    "_master_active_sec": "主人自己在这个会话说过话后，多少秒内机器人不插嘴（0=关闭）",
+    "master_active_sec": 90,
+    "_quiet_hours": "安静时段（真人这时候在睡觉，不回消息）。跨午夜也支持，如 [\"23:30\",\"07:30\"]；留空数组=关闭",
+    "quiet_hours": [
+      "01:30",
+      "07:30"
+    ],
+    "echo_sessions": [
+      "文件传输助手"
+    ],
+    "_interval_note": "增量刷新后每轮 <1s，所以 12 秒一轮（原来 30 秒）"
+  },
+  "rate": {
+    "min_gap_sec": 2.5,
+    "max_gap_sec": 6.0,
+    "window_sec": 120,
+    "window_max_writes": 6,
+    "cooldown_min_sec": 30,
+    "cooldown_max_sec": 75
+  },
+  "redaction": {
+    "enabled": true,
+    "block_on_hit": true,
+    "patterns": [
+      "sk-[A-Za-z0-9_-]{16,}",
+      "api[_-]?key",
+      "Bearer\\s+[A-Za-z0-9._-]{16,}",
+      "密码",
+      "验证码",
+      "身份证",
+      "银行卡"
+    ]
+  },
+  "sender": {
+    "python": "<你的项目路径>\\python.exe",
+    "script": "<你的项目路径>\\send_wechat.py",
+    "workdir": "<你的项目路径>\\sender",
+    "_min_idle_sec": "空闲闸门阈值：主人键鼠空闲不足这么多秒就不发送（防抢焦点）。5=保守，2=测试用",
+    "min_idle_sec": 2.0
+  },
+  "paths": {
+    "whitelist": "state/whitelist.json",
+    "auto": "state/auto.json",
+    "seen": "state/seen.json",
+    "rate": "state/rate.json",
+    "stop": "STOP",
+    "audit": "audit.jsonl",
+    "drafts": "drafts.jsonl",
+    "control": "state/control.json"
+  },
+  "control": {
+    "_说明": "用微信消息当遥控器：给指定会话发这些词就能开关自动对话（手机上也能用）",
+    "chat": "文件传输助手",
+    "stop_words": [
+      "停止",
+      "停下",
+      "别回了",
+      "不要回了",
+      "急停",
+      "stop"
+    ],
+    "resume_words": [
+      "开始",
+      "继续",
+      "恢复",
+      "start"
+    ],
+    "reply_confirm": true,
+    "confirm_stop": "已停止自动对话",
+    "confirm_resume": "已恢复自动对话"
+  },
+  "_notes": {
+    "self_wxid": "主人自己的 wxid（数据目录名去掉 _b422 后缀）",
+    "reply.engine": "cloud=云端 DeepSeek（质量优先）；生成失败就不发",
+    "watch.max_message_age_sec": "只回「刚刚」的消息，超时不回（防回旧账）",
+    "sender": "发送走旧项目已验证的 send_wechat.py（含白名单/脱敏/审计/剪贴板还原/空闲闸门/前台还原）",
+    "send.verify": "永久 false —— 发送绝不读写微信数据库"
+  }
+}
