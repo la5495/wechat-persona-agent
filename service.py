@@ -43,6 +43,28 @@ except Exception:
 
 DETACHED_PROCESS = 0x00000008
 CREATE_NEW_PROCESS_GROUP = 0x00000200
+CREATE_BREAKAWAY_FROM_JOB = 0x01000000      # 脱离父进程的 Windows 作业对象
+
+
+def _spawn_detached(cmd, logf):
+    """启动后台常驻进程。
+
+    ⚠️ 必须带 CREATE_BREAKAWAY_FROM_JOB：
+    从命令行/脚本启动时，子进程会落在调用者的**作业对象**里，
+    而作业对象被回收时会**连带杀掉**里面的进程 —— 实测服务跑一阵就无声消失
+    （日志无任何报错）。脱离作业对象后才能真正长期常驻。
+    """
+    flags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_BREAKAWAY_FROM_JOB
+    try:
+        return subprocess.Popen(cmd, cwd=HERE, stdout=logf,
+                                stderr=subprocess.STDOUT,
+                                creationflags=flags, close_fds=True)
+    except OSError:
+        # 作业不允许脱离（少见）→ 退回普通方式
+        return subprocess.Popen(cmd, cwd=HERE, stdout=logf,
+                                stderr=subprocess.STDOUT,
+                                creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                                close_fds=True)
 
 
 def _load(path, default=None):
@@ -94,8 +116,9 @@ def _guard():
 def cmd_start(args):
     st = _load(STATE, {}) or {}
     if _alive(st.get("pid")):
-        print("ℹ️  已经在跑了（pid=%s，启动于 %s）—— 要重启用 restart"
-              % (st.get("pid"), st.get("started_at")))
+        # 已经在跑 → 直接显示状态（这样「启动」按钮可以当「看状态」用）
+        print("ℹ️  程序已经在跑了 —— 下面是当前状态\n")
+        cmd_status(args)
         return 2
     g, cfg = _guard()
     if g.stopped():
@@ -121,9 +144,7 @@ def cmd_start(args):
     logf.write("[service] start %s  cmd=%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),
                                                  " ".join(cmd)))
     logf.flush()
-    proc = subprocess.Popen(cmd, cwd=HERE, stdout=logf, stderr=subprocess.STDOUT,
-                            creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
-                            close_fds=True)
+    proc = _spawn_detached(cmd, logf)
     _save(STATE, {"pid": proc.pid, "started_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                   "cmd": " ".join(cmd), "log": LOG, "interval": interval,
                   "expected": True})
